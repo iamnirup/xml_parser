@@ -1,0 +1,42 @@
+import io
+import boto3
+
+def get_s3_client():
+    access_id = os.getenv("access_id")
+    access_key = os.getenv("access_key")
+    client = boto3.client("s3", aws_access_key_id=access_id, aws_secret_access_key=access_key)
+    return client
+
+def split_s3_path(s3_path):
+    path_parts = s3_path.replace("s3://", "").split("/")
+    bucket = path_parts.pop(0)
+    key = "/".join(path_parts)
+    return bucket, key
+
+def list_files(bucket, key, s3_client: str = None, prefix = None):
+    if not s3_client:
+        s3_client = get_s3_client()
+
+    if prefix:
+        objects = s3_client.list_objects_v2(Bucket=bucket, Prefix=f'{key}{prefix}')
+    else:
+        objects = s3_client.list_objects_v2(Bucket=bucket, Prefix=key)
+
+    files = []
+    for content in objects['Contents']:
+       files.append(content['Key'])
+    return files
+
+def upload_file(bucket, path, file_name, s3_client: str = None):
+    if not s3_client:
+        s3_client = get_s3_client()
+    s3_client = get_s3_client()
+    s3_client.upload_file(Filename=file_name, Bucket=bucket, Key=path)
+    return True
+
+
+def read_file_data(bucket, path):
+    s3_client = get_s3_client()
+    result = s3_client.get_object(Bucket=bucket, Key=path)
+    data = io.BytesIO(result['Body'].read())
+    return data
