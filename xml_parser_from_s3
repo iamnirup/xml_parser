@@ -86,7 +86,8 @@ if __name__ == "__main__":
             df['file_name'] = file
 
             #upload file to aws s3
-            output_path = 's3://raw-mi-40375-verifone/3153/00000/' # ToDo: replace with output path
+            date_prefix = datetime.datetime.now().strftime("%Y%m%d")
+            output_path = f's3://raw-prcsd-test/{date_prefix}' 
             bucket, path = aws_helper.split_s3_path(output_path)
             output_file = file.replace('.xml', '.csv')
-            s3_client.upload_file(Bucket=bucket, Key=path, Filename=output_file)
+            s3_client.upload_file(Bucket=bucket, Key=path+'/'+output_file, Filename=temp_file_path)
